@@ -446,6 +446,7 @@ if show_last_n_years_percentile_stats:
     
     # Display the last N years' percentile statistics
     st.subheader(f"Percentile Statistics for Last {n_years} Years")
+    st.write("The following amounts are in real terms or 'Today's Dollars'.")
     st.dataframe(last_n_years_percentile_df)
 
 
