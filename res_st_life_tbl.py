@@ -387,6 +387,7 @@ if show_percentile_stats:
     
     # Display the percentile statistics
     st.subheader("Percentile Statistics")
+    st.write("The following amounts are in real terms or 'Today's Dollars'.")
     st.dataframe(percentile_df)
 
 
