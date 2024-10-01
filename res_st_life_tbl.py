@@ -44,8 +44,8 @@ def load_data(cpi_file_path, life_table_file_path):
     return excel_data, life_table_clean
 
 # Paths to your data files
-cpi_file_path = 'cpi_end_val_calcs.xlsx'  # Update with your actual file path
-life_table_file_path = 'life_table.xlsx'  # Update with your actual file path
+cpi_file_path = '/Users/paulruedi/Desktop/Annuity_Iris/cpi_end_val_calcs.xlsx'  # Update with your actual file path
+life_table_file_path = '/Users/paulruedi/Desktop/Annuity_Iris/life_table.xlsx'  # Update with your actual file path
 
 # Load the data
 excel_data, life_table_clean = load_data(cpi_file_path, life_table_file_path)
@@ -383,7 +383,7 @@ if show_percentile_stats:
         percentile_df.loc['Budget Cut %'] = budget_cut_stats.apply(lambda x: x)
     
     # Format values as currency (no decimals) except for percentage and budget cut
-    percentile_df.iloc[:-2] = percentile_df.iloc[:-2].applymap(lambda x: f"${x:,.0f}" if isinstance(x, (int, float)) else x)
+    percentile_df = percentile_df.applymap(lambda x: f"${x:,.0f}" if isinstance(x, (int, float)) else x)
     
     # Display the percentile statistics
     st.subheader("Percentile Statistics")
@@ -442,7 +442,7 @@ if show_last_n_years_percentile_stats:
         last_n_years_percentile_df.loc['Budget Cut %'] = budget_cut_stats_last_n_years
     
     # Format values as currency (no decimals) except for percentage and budget cut
-    last_n_years_percentile_df.iloc[:-2] = last_n_years_percentile_df.iloc[:-2].applymap(lambda x: f"${x:,.0f}" if isinstance(x, (int, float)) else x)
+    last_n_years_percentile_df = last_n_years_percentile_df.applymap(lambda x: f"${x:,.0f}" if isinstance(x, (int, float)) else x)
     
     # Display the last N years' percentile statistics
     st.subheader(f"Percentile Statistics for Last {n_years} Years")
