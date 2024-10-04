@@ -594,5 +594,5 @@ else:
 
 import streamlit as st
 
-# st.markdown('[Click here to go to Google](https://www.paulruedi.com)')
+# st.markdown('[Click here to go to Main Site](https://www.paulruedi.com)')
 
