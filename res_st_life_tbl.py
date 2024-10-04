@@ -591,3 +591,8 @@ if show_irr_stats and 'summary_with_irr_df' in locals() and not summary_with_irr
     )
 else:
     st.sidebar.write("No IRR Summary Results available to download.")
+
+import streamlit as st
+
+st.markdown('[Click here to go to Google](https://www.paulruedi.com)')
+
