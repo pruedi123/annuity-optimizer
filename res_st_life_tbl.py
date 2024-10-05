@@ -44,8 +44,8 @@ def load_data(cpi_file_path, life_table_file_path):
     return excel_data, life_table_clean
 
 # Paths to your data files
-cpi_file_path = 'cpi_end_val_calcs.xlsx'  # Update with your actual file path
-life_table_file_path = 'life_table.xlsx'  # Update with your actual file path
+cpi_file_path = '/Users/paulruedi/Desktop/Annuity_Iris/cpi_end_val_calcs.xlsx'  # Update with your actual file path
+life_table_file_path = '/Users/paulruedi/Desktop/Annuity_Iris/life_table.xlsx'  # Update with your actual file path
 
 # Load the data
 excel_data, life_table_clean = load_data(cpi_file_path, life_table_file_path)
@@ -194,34 +194,36 @@ def calculate_irr_fixed_payment(fixed_payment, portfolio_value, num_years, endin
 # ------------------------------
 # Sidebar for User Inputs
 # ------------------------------
-import streamlit as st
-
-
-# Sidebar for User Inputs
 st.sidebar.header("**Simulation Parameters**")
 
 # Financial Inputs
 st.sidebar.subheader("Financial Parameters")
 
 # Portfolio Value input and display as currency (no decimals)
-portfolio_value = st.sidebar.number_input("Portfolio Value (Upfront Outlay)", value=1000000, step=1000)
-st.sidebar.write(f"Portfolio Value: ${portfolio_value:,.0f}")
+portfolio_value = st.sidebar.number_input("Annuity Cost (Upfront Outlay)", value=1000000, step=1000, help="This is the amount you gave up to receive the guaranteed income stream.")
+st.sidebar.write(f"Amount Paid for Income Stream: ${portfolio_value:,.0f}")
 
 # Fixed Payment input and display as currency (no decimals)
-fixed_payment = st.sidebar.number_input("Fixed Payment", value=65000, step=500)
+fixed_payment = st.sidebar.number_input("Fixed Payment", value=65000, step=500, help="This is the amount of the gross annual payment you receive from pension or annuity.")
 st.sidebar.write(f"Fixed Payment: ${fixed_payment:,.0f}")
 
 # Income Target input and display as currency (no decimals)
-income_target = st.sidebar.number_input("Income Target", value=65000, step=500)
+income_target = st.sidebar.number_input("Income Target", value=40000, step=500, help="This is the amount of inflation-adjusted income you would like to maintain throughout retirement. If you want to see what would happen if you just spend the income stream in full, enter the same value as the actual fixed payment.")
 st.sidebar.write(f"Income Target: ${income_target:,.0f}")
 
 # Surplus Threshold input and display as currency (no decimals)
-surplus_threshold = st.sidebar.number_input("Surplus Threshold", value=100000, min_value=0, step=1000)
+surplus_threshold = st.sidebar.number_input("Surplus Threshold", value=100000, min_value=0, step=1000, help="This is the balance of the surplus that needs to be met before investor can spend additional money beyond the targeted income amount.")
 st.sidebar.write(f"Surplus Threshold: ${surplus_threshold:,.0f}")
-num_years = st.sidebar.number_input("Number of Years", value=24, min_value=1, max_value=50)
-interest_rate = st.sidebar.number_input("Interest Rate (e.g., 0.03 for 3%)", value=0.03, format="%.4f")
 
+# Number of Years
+num_years = st.sidebar.number_input("Number of Years", value=24, min_value=1, max_value=50, help="This is the number of years you expect to live.")
+
+# Interest Rate
+interest_rate = st.sidebar.number_input("Interest Rate (e.g., 0.03 for 3%)", value=0.03, format="%.4f", help="This rate is used to estimate the interest rate return you think is reasonable that could have been earned on the surplus account.")
+
+# ------------------------------
 # Mortality Inputs
+# ------------------------------
 st.sidebar.subheader("Mortality Parameters")
 num_people = st.sidebar.radio("Number of People", ("One", "Two"), index=1)  # Set default to "Two"
 age1 = st.sidebar.number_input("Current Age of Person 1", value=65, min_value=0, max_value=120)
@@ -235,11 +237,15 @@ else:
     age2 = None
     sex2 = None
 
+# ------------------------------
 # Analysis Options
+# ------------------------------
 st.sidebar.subheader("Analysis Options")
-n_years = st.sidebar.slider("Select Last N Years to focus on latter part of retirement", min_value=1, max_value=num_years, value=5)
+n_years = st.sidebar.slider("Select Last N Years to focus on latter part of retirement", min_value=1, max_value=num_years, value=5, help="This is the number of years toward the end of retirement that you want to isolate.")
 
+# ------------------------------
 # Display Options
+# ------------------------------
 st.sidebar.subheader("Display Options")
 show_success_rate = st.sidebar.checkbox("Show Probability of Success", value=True)
 show_detailed_results = st.sidebar.checkbox("Show Detailed Results", value=False)
@@ -247,7 +253,6 @@ show_summary_results = st.sidebar.checkbox("Show Summary Results", value=False)
 show_percentile_stats = st.sidebar.checkbox("Show Percentile Statistics", value=True)
 show_last_n_years_percentile_stats = st.sidebar.checkbox(f"Show Last {n_years} Years Percentile Statistics", value=True)
 show_irr_stats = st.sidebar.checkbox("Show IRR Statistics", value=True)
-
 
 # ------------------------------
 # Main Area - Calculations and Outputs
@@ -260,19 +265,11 @@ if isinstance(either_alive_prob, str):
     st.error(either_alive_prob)
 else:
     if num_people == "Two":
-        # Output for two people
         st.write(f"Probability that either ({sex1}, age {age1}) or ({sex2}, age {age2}) will be alive after {num_years} years: {either_alive_prob:.0%}")
-        
-        # Output for the inverse probability (1 - prob of either living)
         st.write(f"That means there is a {1 - either_alive_prob:.0%} chance that neither ({sex1}, age {age1}) nor ({sex2}, age {age2}) will be alive after {num_years} years.")
     else:
-        # Output for one person
         st.write(f"Probability that ({sex1}, age {age1}) will be alive after {num_years} years is approximately: {either_alive_prob:.0%}")
-        
-        # Output for the inverse probability (1 - prob of living)
         st.write(f"That means there is a {1 - either_alive_prob:.0%} chance that ({sex1}, age {age1}) will not be alive after {num_years} years.")
-
-
 
 # Calculate spending and surplus
 all_rows = []
@@ -315,10 +312,11 @@ last_n_years_df = detailed_results_df[detailed_results_df['Year'] > (num_years -
 # Calculate success rate for the last N years
 success_rate_last_n_years = calculate_last_n_years_success(last_n_years_df, income_target)
 
-# Display success rate for last N years
-if show_success_rate:
-    st.write(f"Probability of Success Complete Period: {int(success_rate)}%")
-    st.write(f"Probability of Success for Last {n_years} Years: {int(success_rate_last_n_years)}%")
+# Display success rate for the complete period
+st.write(f"**Probability of meeting your goal** of a spendable, real-inflation-adjusted Income Target value of ${income_target:,.0f} per-year (on average) over the **full retirement** period was: **{int(success_rate)}%**.")
+
+# Display success rate for the last N years
+st.write(f"**Probability of meeting your goal** of a spendable, real-inflation-adjusted Income Target value of ${income_target:,.0f} per-year (on average) over the **Last {n_years} Years** was: **{int(success_rate_last_n_years)}%**.")
 
 # Display Detailed Results
 if show_detailed_results:
@@ -362,7 +360,7 @@ if show_percentile_stats:
             summary_results_df['Ending Surplus'].max()
         ]
     }
-    
+
     # Create a DataFrame for percentile statistics
     percentile_df = pd.DataFrame(summary_stats, index=["Average Actual Spend", "Ending Surplus"]).round(0)
 
@@ -379,17 +377,51 @@ if show_percentile_stats:
     if not below_100.empty:
         budget_cut_stats = below_100.apply(lambda x: f"{100 - x:.0f}%")
         percentile_df.loc['Budget Cut %'] = budget_cut_stats
-        # Format Budget Cut % as percentage
-        percentile_df.loc['Budget Cut %'] = budget_cut_stats.apply(lambda x: x)
-    
-    # Format values as currency (no decimals) except for percentage and budget cut
-    percentile_df = percentile_df.applymap(lambda x: f"${x:,.0f}" if isinstance(x, (int, float)) else x)
-    
-    # Display the percentile statistics
-    st.subheader("Percentile Statistics")
-    st.write("The following amounts are in real terms or 'Today's Dollars'.")
-    st.dataframe(percentile_df)
 
+    # Format values as currency (no decimals) except for percentage and budget cut
+    percentile_df = percentile_df.apply(lambda col: col.map(lambda x: f"${x:,.0f}" if isinstance(x, (int, float)) else x))
+    # Add a radio button to toggle the display of explanations
+    show_explanation = st.radio(
+        "Would you like to see an explanation of the Percentile Statistics?", 
+        ("No", "Yes"), 
+        index=1  # Set "Yes" as the default selection
+    )
+
+    # Display the percentile statistics header
+    st.subheader("Percentile Statistics")
+    st.write("The following amounts are in real (inflation-adjusted) terms or 'Today's Dollars'.")
+    st.write(f"Total number of trials available for historical audit: {len(summary_rows)}")
+    st.write(f"These results assumes one person is alive for the full {num_years} year period.")
+
+    # If the user selects "Yes", display the explanations
+    if show_explanation == "Yes":
+        st.markdown("""
+        <div style="background-color: #e9f5ff; padding: 10px; border-radius: 5px;">
+            <strong>ROW INFO:</strong> 
+            The <u>Average Actual Spend row</u> is the average of each retirement trial tested. 
+            <u>Ending Surplus row</u> is the cumulative of the difference between the Fixed Payment and the Income Target value. 
+            The <u>As % of Income Target row</u> is the percentage of the Income Target you actually received in real-inflation-adjusted terms. 
+            The <u>Budget Cut % row</u>, if applicable, is the amount of a budget cut you would have had to make given the amount of inflation-adjusted-income available.
+        </div>
+        """, unsafe_allow_html=True)
+
+
+
+        st.markdown("""
+        <div style="background-color: #e9f5ff; padding: 10px; border-radius: 5px;">
+            <strong>Percentile Info:</strong> 
+            <u>Min column</u> is the lowest average annual income for all trials. 
+            <u>10th Percentile column</u> means 10% of all trials had a value equal to or lower than this value (and 90% of trials had higher values). 
+            The <u>25th Percentile column</u> means 25% of all trials had a value equal to or lower than this value (and 75% of trials had higher values). 
+            <u>Median column</u> means half of the trials had values lower than this (and half had values higher). 
+            <u>75th Percentile column</u> means 75% of all trials had a value equal to or lower than this value (and 25% of trials had higher values). 
+            <u>90th Percentile column</u> means 90% of all trials had a value equal to or lower than this value (and 10% of trials had higher values). 
+            <u>Max column</u> is the trial with the highest value.
+        </div>
+        """, unsafe_allow_html=True)
+
+    # Display the percentile DataFrame
+    st.dataframe(percentile_df)
 
 # Calculate and Display Percentile Statistics for Last N Years
 if show_last_n_years_percentile_stats:
@@ -423,7 +455,7 @@ if show_last_n_years_percentile_stats:
             last_n_years_df['Ending Surplus'].max()
         ]
     }
-    
+
     # Create a DataFrame for the last N years' percentile statistics
     last_n_years_percentile_df = pd.DataFrame(last_n_years_stats, index=["Actual Spend (Last N Years)", "Ending Surplus (Last N Years)"]).round(0)
 
@@ -433,23 +465,19 @@ if show_last_n_years_percentile_stats:
     # Add the percentage row to the DataFrame
     last_n_years_percentile_df.loc['As % of Income Target'] = percentage_stats_last_n_years.apply(lambda x: f"{x:.0f}%")
 
-    # Check if any values are below 100%
+    # Check if any values are below 100%, and calculate Budget Cut %
     below_100_last_n_years = percentage_stats_last_n_years[percentage_stats_last_n_years < 100]
-
-    # If there are values below 100%, calculate Budget Cut % and add the row
     if not below_100_last_n_years.empty:
         budget_cut_stats_last_n_years = below_100_last_n_years.apply(lambda x: f"{100 - x:.0f}%")
         last_n_years_percentile_df.loc['Budget Cut %'] = budget_cut_stats_last_n_years
-    
-    # Format values as currency (no decimals) except for percentage and budget cut
-    last_n_years_percentile_df = last_n_years_percentile_df.applymap(lambda x: f"${x:,.0f}" if isinstance(x, (int, float)) else x)
-    
+
+    # Format values for the percentile DataFrame (for currency format)
+    last_n_years_percentile_df = last_n_years_percentile_df.apply(lambda col: col.map(lambda x: f"${x:,.0f}" if isinstance(x, (int, float)) else x))
+
     # Display the last N years' percentile statistics
     st.subheader(f"Percentile Statistics for Last {n_years} Years")
     st.write("The following amounts are in real terms or 'Today's Dollars'.")
     st.dataframe(last_n_years_percentile_df)
-
-
 
 # ------------------------------
 # IRR Calculations and Outputs
@@ -491,17 +519,17 @@ if show_irr_stats:
             '90th Percentile': [summary_with_irr_df['IRR (%)'].quantile(0.90)],
             'Max': [summary_with_irr_df['IRR (%)'].max()]
         }
-    
+
         # Create a DataFrame for IRR statistics
         irr_stats_df = pd.DataFrame(irr_stats, index=["IRR (%)"]).round(2)
-        
+
         # Format IRR statistics as percentage for display
-        irr_stats_df = irr_stats_df.applymap(lambda x: f"{x:.2f}%")
-    
+        irr_stats_df = irr_stats_df.apply(lambda col: col.map(lambda x: f"{x:.2f}%" if isinstance(x, (int, float)) else x))
+
         # Display the IRR statistics
         st.subheader("IRR Statistics")
-        # st.dataframe(irr_stats_df)
-        
+        st.dataframe(irr_stats_df)
+
         # Calculate IRR for Fixed Payment over N years and display after subheader
         if len(summary_rows) > 0:
             irr_fixed_payment = calculate_irr_fixed_payment(
@@ -510,50 +538,10 @@ if show_irr_stats:
                 num_years, 
                 summary_rows[0]['Ending Surplus']  # Using the first trial's Ending Surplus for now
             )
-            st.write(f"IRR for Fixed Payment over {num_years} years: {irr_fixed_payment:.2f}%")
+            st.write(f"IRR for Fixed Payment over {num_years} years: {irr_fixed_payment:.2f}%.")
         else:
             st.write(f"IRR for Fixed Payment over {num_years} years: N/A")
-         
-         
-if isinstance(either_alive_prob, str):
-    st.error(either_alive_prob)
-else:
-    if num_people == "Two":
-        # Output for two people
-        # st.write(f"Probability that either ({sex1}, age {age1}) or ({sex2}, age {age2}) will be alive after {num_years} years: {either_alive_prob:.0%}")
-        
-        # Output for the inverse probability (1 - prob of either living)
-        st.write(f"Remember, there is a {1 - either_alive_prob:.0%} chance that neither ({sex1}, age {age1}) nor ({sex2}, age {age2}) will be alive after {num_years} years. If so, then the returns would be lower than shown below.")
-    else:
-        # Output for one person
-        # st.write(f"Probability that ({sex1}, age {age1}) will be alive after {num_years} years is approximately: {either_alive_prob:.0%}")
-        
-        # Output for the inverse probability (1 - prob of living)
-        st.write(f"Remember, there is a {1 - either_alive_prob:.0%} chance that ({sex1}, age {age1}) will not be alive after {num_years} years. If so, then the returns would be lower than shown below.")   
-                
-    # Calculate percentile statistics for IRR
-    if not summary_with_irr_df.empty:
-        irr_stats = {
-            'Min': [summary_with_irr_df['IRR (%)'].min()],
-            '10th Percentile': [summary_with_irr_df['IRR (%)'].quantile(0.10)],
-            '25th Percentile': [summary_with_irr_df['IRR (%)'].quantile(0.25)],
-            'Median': [summary_with_irr_df['IRR (%)'].median()],
-            '75th Percentile': [summary_with_irr_df['IRR (%)'].quantile(0.75)],
-            '90th Percentile': [summary_with_irr_df['IRR (%)'].quantile(0.90)],
-            'Max': [summary_with_irr_df['IRR (%)'].max()]
-        }
-    
-        # Create a DataFrame for IRR statistics
-        irr_stats_df = pd.DataFrame(irr_stats, index=["IRR (%)"]).round(2)
-        
-        # Format IRR statistics as percentage for display
-        irr_stats_df = irr_stats_df.applymap(lambda x: f"{x:.2f}%")
-    
-        # Display the IRR statistics
-        # st.subheader("IRR Statistics")
-        st.dataframe(irr_stats_df)
 
-        
 # ------------------------------
 # Sidebar Download Buttons
 # ------------------------------
@@ -592,7 +580,7 @@ if show_irr_stats and 'summary_with_irr_df' in locals() and not summary_with_irr
 else:
     st.sidebar.write("No IRR Summary Results available to download.")
 
-import streamlit as st
+
 
 # st.markdown('[Click here to go to Main Site](https://www.paulruedi.com)')
 
