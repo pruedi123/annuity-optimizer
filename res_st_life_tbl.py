@@ -44,8 +44,8 @@ def load_data(cpi_file_path, life_table_file_path):
     return excel_data, life_table_clean
 
 # Paths to your data files
-cpi_file_path = 'Annuity_Iris/cpi_end_val_calcs.xlsx'  # Update with your actual file path
-life_table_file_path = 'Annuity_Iris/life_table.xlsx'  # Update with your actual file path
+cpi_file_path = 'cpi_end_val_calcs.xlsx'  # Update with your actual file path
+life_table_file_path = 'life_table.xlsx'  # Update with your actual file path
 
 # Load the data
 excel_data, life_table_clean = load_data(cpi_file_path, life_table_file_path)
