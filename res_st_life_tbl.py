@@ -208,7 +208,7 @@ fixed_payment = st.sidebar.number_input("Fixed Payment", value=65000, step=500, 
 st.sidebar.write(f"Fixed Payment: ${fixed_payment:,.0f}")
 
 # Income Target input and display as currency (no decimals)
-income_target = st.sidebar.number_input("Income Target", value=40000, step=500, help="This is the amount of inflation-adjusted income you would like to maintain throughout retirement. If you want to see what would happen if you just spend the income stream in full, enter the same value as the actual fixed payment.")
+income_target = st.sidebar.number_input("Income Target", value=65000, step=500, help="This is the amount of inflation-adjusted income you would like to maintain throughout retirement. If you want to see what would happen if you just spend the income stream in full, enter the same value as the actual fixed payment.")
 st.sidebar.write(f"Income Target: ${income_target:,.0f}")
 
 # Surplus Threshold input and display as currency (no decimals)
